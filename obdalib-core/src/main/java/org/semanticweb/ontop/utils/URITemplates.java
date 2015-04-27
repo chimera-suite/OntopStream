@@ -28,70 +28,71 @@ import org.semanticweb.ontop.exception.InvalidPrefixWritingException;
 import org.semanticweb.ontop.io.PrefixManager;
 import org.semanticweb.ontop.model.Function;
 import org.semanticweb.ontop.model.Term;
+import org.semanticweb.ontop.model.ValueConstant;
 import org.semanticweb.ontop.model.Variable;
 
 /**
  * A utility class for URI templates
- * 
+ *
  * @author xiao
  *
  */
 public class URITemplates {
-	
+
 	private static final String PLACE_HOLDER = "{}";
 	private static final int PLACE_HOLDER_LENGTH = PLACE_HOLDER.length();
-	
+
 	/**
 	 * This method instantiates the input uri template by arguments
-	 * 
+	 *
 	 * <p>
-	 * 
+	 *
 	 * Example:
 	 * <p>
-	 * 
+	 *
 	 * If {@code args = ["A", 1]}, then
-	 * 
-	 * {@code  URITemplates.format("http://example.org/{}/{}", args)} 
+	 *
+	 * {@code  URITemplates.format("http://example.org/{}/{}", args)}
 	 * results {@code "http://example.org/A/1" }
-	 * 
-	 * 
+	 *
+	 *
 	 * @see #format(String, Object...)
-	 * 
+	 *
 	 * @param uriTemplate
 	 * @param args
 	 * @return
 	 */
 	public static String format(String uriTemplate, Collection<?> args) {
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		int beginIndex = 0;
-		
+
 		for(Object arg : args){
-			
+
 			int endIndex = uriTemplate.indexOf(PLACE_HOLDER, beginIndex);
-			
+
 			sb.append(uriTemplate.subSequence(beginIndex, endIndex)).append(arg);
-			
+
 			beginIndex = endIndex + PLACE_HOLDER_LENGTH;
 		}
-		
+
 		sb.append(uriTemplate.substring(beginIndex));
-		
+
 		return sb.toString();
-		
+
 	}
 
 	/**
 	 * This method instantiates the input uri template by arguments
-	 * 
+	 *
 	 * <p>
-	 * 
+	 *
 	 * Example:
 	 * <p>
-	 * 
+	 *
 	 * {@code  URITemplates.format("http://example.org/{}/{}", "A", 1)} results {@code "http://example.org/A/1" }
-	 * 
+	 *
 	 * @param uriTemplate
 	 * @param args
 	 * @return
@@ -100,29 +101,29 @@ public class URITemplates {
 		return format(uriTemplate, Arrays.asList(args));
 	}
 
-	
+
 	public static String getUriTemplateString(Function uriFunction) {
 		Term term = uriFunction.getTerm(0);
-		String template = term.toString();
+		String template = ((ValueConstant)term).getValue();
 		Iterator<Variable> vars = uriFunction.getVariables().iterator();
 		String[] split = template.split("\\{\\}");
 		int i = 0;
 		template = "";
-		while (vars.hasNext()) {
-			template += split[i] + "{" + vars.next().toString() + "}";
-			i++;
-		}
-		//the number of place holdes should be equal to the number of variables.
-		if (split.length-i == 1){
-			template += split[i];
-			//we remove the quotes cos later the literal constructor adds them
-			template= template.substring(1, template.length()-1);
-		}else{
-			throw new IllegalArgumentException("the number of place holdes should be equal to the number of variables.");
-		}
-		
-		
-		return template;
+	    while (vars.hasNext()) {
+            template += split[i] + "{" + vars.next().toString() + "}";
+            i++;
+        }
+        //the number of place holdes should be equal to the number of variables.
+        if (split.length-i == 1){
+            template += split[i];
+        } else if(split.length == i){
+            // do nothing
+        } else{
+            throw new IllegalArgumentException("the number of place holdes should be equal to the number of variables.");
+        }
+
+
+        return template;
 	}
 
 	public static String getUriTemplateString(Function uriTemplate,
