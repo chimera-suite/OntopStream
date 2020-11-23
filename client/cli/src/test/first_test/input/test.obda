@@ -13,7 +13,7 @@ terms:		http://purl.org/dc/terms/
 
 [MappingDeclaration] @collection [[
 mappingId	test
-target		:TEST a :TestObject; :hasLong {rideId}.
-source		SELECT `rideId` FROM `Fares`;
+target		:TEST a :TestObject; :hasLong {rideId}; :hasString {payMethod}; :hasFloat {tip}.
+source		SELECT `rideId`,`payMethod`,`tip` FROM `Fares`;
 ]]
 
