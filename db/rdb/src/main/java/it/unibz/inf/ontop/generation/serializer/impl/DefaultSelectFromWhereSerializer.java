@@ -86,6 +86,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             // Creates an alias for this SQLExpression and uses it for the projected columns
             RelationID alias = generateFreshViewAlias();
+            System.out.println("---------------------------FLINK QUERY----------------------------"); //todo: remove debug
+            System.out.println(sql);
+            System.out.println("------------------------------------------------------------------");
             return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases));
         }
 
