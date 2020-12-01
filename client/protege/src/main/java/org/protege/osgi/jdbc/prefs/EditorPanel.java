@@ -71,7 +71,7 @@ public class EditorPanel extends JDialog {
         centerPane.add(new JLabel("Class Name:"));
         classField = new JComboBox<>();
         classField.setEditable(true);
-        classField.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "select or type the JDBC Driver's class...", "org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver", "oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver" }));
+        classField.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "select or type the JDBC Driver's class...", "org.postgresql.Driver", "com.mysql.jdbc.Driver", "org.h2.Driver", "com.ibm.db2.jcc.DB2Driver", "oracle.jdbc.driver.OracleDriver", "com.microsoft.sqlserver.jdbc.SQLServerDriver", "org.apache.hive.jdbc.HiveDriver" }));
         centerPane.add(classField);
         
         centerPane.add(new JLabel("Driver File (jar):"));
