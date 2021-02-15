@@ -155,6 +155,10 @@ public class OntopQuery extends OntopReasoningCommandBase {
             }
             wr.append(String.join(",", valueListBuilder.build()));
             wr.newLine();
+
+            // Force the Flush operation every new row (non-temporized buffer)
+            // TODO: check efficiency of repeted flushes
+            wr.flush();
         }
         wr.flush();
 
