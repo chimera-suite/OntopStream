@@ -1,0 +1,310 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.semanticweb.org/TaxiRides#"
+     xml:base="http://www.semanticweb.org/TaxiRides"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/TaxiRides"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#drives -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#drives">
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/TaxiRides#isDrivenBy"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Driver"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/TaxiRides#Taxi"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#hasTaxi -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#hasTaxi">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/TaxiRides#Taxi"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#isDrivenBy -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#isDrivenBy"/>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#isReferredTo -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#isReferredTo">
+        <owl:inverseOf rdf:resource="http://www.semanticweb.org/TaxiRides#refersTo"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#refersTo -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#refersTo">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#startsA -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#startsA">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Driver"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/TaxiRides#DrivingShift"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#uses -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#uses">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#DrivingShift"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/TaxiRides#Taxi"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Data properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#ID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#ID">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Driver"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Taxi"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#long"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#driverID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#driverID">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/TaxiRides#ID"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Driver"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#fare -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#fare">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#fareID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#fareID">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/TaxiRides#ID"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#geoInfo -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#geoInfo">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#isStart -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#isStart">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#lat -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#lat">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/TaxiRides#geoInfo"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#lon -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#lon">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/TaxiRides#geoInfo"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#payMethod -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#payMethod">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#payTime -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#payTime">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#psgCnt -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#psgCnt">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#rideID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#rideID">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/TaxiRides#ID"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#rideTime -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#rideTime">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#startTime -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#startTime">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#DrivingShift"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#dateTime"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#taxiID -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#taxiID">
+        <rdfs:subPropertyOf rdf:resource="http://www.semanticweb.org/TaxiRides#ID"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Taxi"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#tip -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#tip">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#toll -->
+
+    <owl:DatatypeProperty rdf:about="http://www.semanticweb.org/TaxiRides#toll">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    </owl:DatatypeProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#Driver -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/TaxiRides#Driver">
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#DrivingShift"/>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Taxi"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#DrivingShift -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/TaxiRides#DrivingShift">
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Taxi"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#Fare -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/TaxiRides#Fare">
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Taxi"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#Ride -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/TaxiRides#Ride">
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Taxi"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/TaxiRides#Taxi -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/TaxiRides#Taxi"/>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.9.2019-02-01T07:24:44Z) https://github.com/owlcs/owlapi -->
+
