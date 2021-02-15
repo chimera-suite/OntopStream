@@ -69,4 +69,13 @@ public class FlinkSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
         return ImmutableMap.copyOf(map);
     }
 
+    @Override
+    public String getDBTrueLexicalValue() {
+        return "true";
+    }
+
+    @Override
+    public String getDBFalseLexicalValue() {
+        return "false";
+    }
 }
