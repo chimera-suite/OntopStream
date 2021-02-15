@@ -132,12 +132,10 @@ public class OntopQuery extends OntopReasoningCommandBase {
     public static void printResult(OutputStream out, TupleOWLResultSet result) throws Exception {
 
         boolean temporizedWriter = false;
-        int time = 10;
 
+        if (temporizedWriter) {   //Make a buffer flush for each time interval or if the buffer is full (less computation effort)
 
-        // Classic NON-temporized writer
-        if (temporizedWriter) {
-            System.out.println("TEMPORIZZATO");
+            int time = 10;
 
             PeriodicFlushingBufferedWriter wr = new PeriodicFlushingBufferedWriter(new OutputStreamWriter(out, "utf8"),time*1000);
 
@@ -168,8 +166,8 @@ public class OntopQuery extends OntopReasoningCommandBase {
             wr.flush();
         }
         else
-        {
-            System.out.println("NON-TEMPORIZZATO");
+        {   //Classic streming writer, flush the buffer whenever the output is available
+
             BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, "utf8"));
 
             /*
@@ -197,7 +195,7 @@ public class OntopQuery extends OntopReasoningCommandBase {
                 wr.newLine();
 
                 // Force the Flush operation every new row (non-temporized buffer)
-                // TODO: check efficiency of repeted flushes
+                // TODO: check efficiency of repeated flushes
                 wr.flush();
             }
             wr.flush();
