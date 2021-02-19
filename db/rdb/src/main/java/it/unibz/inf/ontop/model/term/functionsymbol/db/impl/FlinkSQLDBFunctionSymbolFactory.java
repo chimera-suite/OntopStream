@@ -54,13 +54,12 @@ public class FlinkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     @Override
     protected String serializeDateTimeNorm(ImmutableList<? extends ImmutableTerm> terms,
                                            Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return   String.format("%s", termConverter.apply(terms.get(0)));
+        return String.format("CONCAT(REPLACE(DATE_FORMAT(%s,'yyyy-MM-dd HH:mm:ss.SSS'),' ','T'),'Z')", termConverter.apply(terms.get(0)));
     }
 
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
         return new FlinkSQLTimestampISODenormFunctionSymbol(timestampType, dbStringType);
-        //return String.format(, termConverter.apply(0));
     }
 
     @Override
@@ -126,7 +125,7 @@ public class FlinkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
 
     /*@Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
-        return new SparkSQLR2RMLSafeIRIEncodeFunctionSymbol(dbStringType);
+        return new FlinkSQLR2RMLSafeIRIEncodeFunctionSymbolImpl(dbStringType);
     }*/
 }
 

@@ -13,8 +13,7 @@ import java.util.function.Function;
 public class FlinkSQLTimestampISODenormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl{
 
     private final DBTermType dbStringType;
-    //protected static final String TEMPLATE = "TO_TIMESTAMP(%s, 'yyyy-MM-dd HH:mm:ss.SSSxxx')";
-    protected static final String TEMPLATE = "%s";
+    protected static final String TEMPLATE = "TO_TIMESTAMP(%s,'yyyy-MM-dd HH:mm:ss.SSS')";
 
     protected FlinkSQLTimestampISODenormFunctionSymbol(DBTermType dbTimestampType, DBTermType dbStringType) {
 
@@ -47,9 +46,9 @@ public class FlinkSQLTimestampISODenormFunctionSymbol extends AbstractDBTypeConv
 
         ImmutableFunctionalTerm replaceZTerm = termFactory.getDBReplace(replaceTTerm,
                 termFactory.getDBStringConstant("Z"),
-                termFactory.getDBStringConstant("+00:00"));
+                termFactory.getDBStringConstant(""));
 
-        System.out.println(String.format(TEMPLATE, termConverter.apply(replaceZTerm)));
+        //System.out.println(String.format(TEMPLATE, termConverter.apply(replaceZTerm)));
         return String.format(TEMPLATE, termConverter.apply(replaceZTerm));
     }
 
