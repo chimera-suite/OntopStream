@@ -3,5 +3,5 @@ PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 PREFIX : <http://www.semanticweb.org/TaxiRides#>
 
 SELECT * WHERE {
-  ?x a :Ride ; :rideTime ?y .
+  ?x a :Ride; ?y ?z .
 }
