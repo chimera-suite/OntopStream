@@ -22,6 +22,9 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 
 /**
@@ -149,6 +152,15 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		if (IS_DEBUG_ENABLED)
 			log.debug("Resulting native query: \n{}", executableQuery);
+
+		try {
+			Path fileName = Path.of("/home/matbelcao/Scrivania/query.txt");
+			String content = executableQuery.getTree().toString();
+			Files.writeString(fileName, content);
+		}catch(IOException e){
+			System.out.println("Error on writing the debug query on a file. Please check the hardcoded filename location in " +
+					"engine/reformulation/core/src/main/java/it/unibz/inf/ontop/answering/reformulation/impl/QuestQueryProcessor.java");
+		}
 
 		return executableQuery;
 	}

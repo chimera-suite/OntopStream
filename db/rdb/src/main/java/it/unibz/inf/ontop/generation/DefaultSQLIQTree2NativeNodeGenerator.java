@@ -48,6 +48,10 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
     public NativeNode generate(IQTree iqTree, DBParameters dbParameters, boolean tolerateUnknownTypes) {
         ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(iqTree.getVariables());
 
+        System.out.println("--------------- QUERY TREE PSEUDOCODE ---------------");
+        System.out.println("\n"+iqTree+"\nSIGNATURE: "+signature);
+        System.out.println("-----------------------------------------------------");
+
         SelectFromWhereWithModifiers selectFromWhere = converter.convert(iqTree, signature);
         SelectFromWhereSerializer.QuerySerialization serializedQuery = serializer.serialize(selectFromWhere, dbParameters);
 
@@ -57,6 +61,11 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().getAttribute()));
+
+        System.out.println("--------------- ADDITIONAL DEBUG INFO ---------------");
+        System.out.println("VARIABLES TYPE MAP: "+variableTypeMap);
+        System.out.println("COLUMN NAMES: "+columnNames);
+        System.out.println("-----------------------------------------------------");
 
         return iqFactory.createNativeNode(signature, variableTypeMap, columnNames,
                 serializedQuery.getString(), iqTree.getVariableNullability());
