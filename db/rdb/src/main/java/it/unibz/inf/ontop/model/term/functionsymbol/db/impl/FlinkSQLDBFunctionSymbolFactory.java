@@ -20,7 +20,7 @@ import java.util.function.Function;
  */
 public class FlinkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
-    private static final String UNSUPPORTED_MSG = "Not supported by Spark or not still to be implemented";
+    private static final String UNSUPPORTED_MSG = "Not supported by Apache Flink or still to be implemented";
 
     @Inject
     protected FlinkSQLDBFunctionSymbolFactory(TypeFactory typeFactory) {
@@ -123,10 +123,10 @@ public class FlinkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         throw new UnsupportedOperationException("Serialization of the time zone: " + UNSUPPORTED_MSG);
     }
 
-    /*@Override
+    @Override
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
         return new FlinkSQLR2RMLSafeIRIEncodeFunctionSymbolImpl(dbStringType);
-    }*/
+    }
 }
 
 
