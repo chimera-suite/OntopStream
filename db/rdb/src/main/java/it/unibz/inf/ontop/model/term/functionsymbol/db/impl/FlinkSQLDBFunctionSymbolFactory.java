@@ -127,6 +127,11 @@ public class FlinkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
     protected DBFunctionSymbol createR2RMLIRISafeEncode() {
         return new FlinkSQLR2RMLSafeIRIEncodeFunctionSymbolImpl(dbStringType);
     }
+
+    @Override
+    protected DBFunctionSymbol createDBCase(int arity, boolean doOrderingMatter) {
+        return new FlinkDBCaseFunctionSymbol(arity, dbBooleanType, abstractRootDBType, doOrderingMatter);
+    }
 }
 
 
