@@ -89,6 +89,12 @@
             <artifactId>yasper</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>it.polimi.sr.rsp</groupId>
+            <artifactId>yasper</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 

@@ -4,7 +4,7 @@
         <groupId>it.unibz.inf.ontop</groupId>
         <artifactId>ontop</artifactId>
         <version>4.0.3</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,5 +16,14 @@
         <module>rdf4j</module>
         <module>rsp4j</module>
     </modules>
+
+    <dependencies>
+         <dependency>
+            <groupId>org.apache.jena</groupId>
+            <artifactId>apache-jena-libs</artifactId>
+            <version>3.17.0</version>
+            <type>pom</type>
+        </dependency>
+    </dependencies>
 
 </project>
