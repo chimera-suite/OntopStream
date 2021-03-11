@@ -63,6 +63,12 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>jdk-misc</artifactId>
+            <version>3.Final</version>
+        </dependency>
     </dependencies>
 
     <!-- easy testing -->

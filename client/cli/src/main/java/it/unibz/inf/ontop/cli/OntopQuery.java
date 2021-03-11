@@ -33,19 +33,23 @@ import it.unibz.inf.ontop.owlapi.OntopOWLFactory;
 import it.unibz.inf.ontop.owlapi.OntopOWLReasoner;
 import it.unibz.inf.ontop.owlapi.connection.OWLConnection;
 import it.unibz.inf.ontop.owlapi.connection.OWLStatement;
+import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.OWLBindingSet;
 import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import org.semanticweb.owlapi.apibinding.OWLManager;
 import org.semanticweb.owlapi.io.ToStringRenderer;
+import org.semanticweb.owlapi.model.OWLException;
 import org.semanticweb.owlapi.model.OWLOntology;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.semanticweb.owlapi.model.OWLOntologyManager;
+import sun.misc.Signal;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.util.stream.Collectors.joining;
 
@@ -104,15 +108,36 @@ public class OntopQuery extends OntopReasoningCommandBase {
              OWLStatement st = conn.createStatement();
         ) {
 
-			/*
-             * Reading query file:
-			 */
-//            String query = Joiner.on("\n").
-//                    join(Files.readAllLines(Paths.get(queryFile), StandardCharsets.UTF_8));
+            // Handle the query termination with CTRL+C during the connection setup
+            Signal.handle(new Signal("INT"),  // SIGINT
+                    signal -> {
+                        try {
+                            System.out.println("WAITING...");
+                            TimeUnit.SECONDS.sleep(20);
+                            st.cancel();
+                            st.close();
+                            conn.close();
+                        } catch (OWLException | InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    });
 
             String query = Files.lines(Paths.get(queryFile), StandardCharsets.UTF_8).collect(joining("\n"));
 
             TupleOWLResultSet result = st.executeSelectQuery(query);
+
+            // Handle the query termination with CTRL+C during the results fetching and writing
+            Signal.handle(new Signal("INT"),  // SIGINT
+                    signal -> {
+                        try {
+                            result.close();
+                            st.cancel();
+                            st.close();
+                            conn.close();
+                        } catch (OWLException e) {
+                            e.printStackTrace();
+                        }
+                    });
 
             OutputStream out = null;
             if (outputFile == null) {
@@ -123,6 +148,8 @@ public class OntopQuery extends OntopReasoningCommandBase {
             printResult(out, result);
 
 
+        } catch (OntopOWLException e) {
+            System.out.println("CONNECTION CLOSED");
         } catch (Exception e1) {
             e1.printStackTrace();
 
@@ -153,20 +180,23 @@ public class OntopQuery extends OntopReasoningCommandBase {
             }
             wr.newLine();
 
-            while (result.hasNext()) {
-                final OWLBindingSet bindingSet = result.next();
-                ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
-                for (String columnName : signature) {
-                    // TODO: make it robust to NULLs
-                    valueListBuilder.add(ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(columnName)));
+            try {
+                while (result.hasNext()) {
+                    final OWLBindingSet bindingSet = result.next();
+                    ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
+                    for (String columnName : signature) {
+                        // TODO: make it robust to NULLs
+                        valueListBuilder.add(ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(columnName)));
+                    }
+                    wr.append(String.join(",", valueListBuilder.build()));
+                    wr.newLine();
                 }
-                wr.append(String.join(",", valueListBuilder.build()));
-                wr.newLine();
+                wr.flush();
+            } catch (OntopOWLException e) {
+                System.out.println("CONNECTION CLOSED");
             }
-            wr.flush();
-        }
-        else
-        {   //Classic streming writer, flush the buffer whenever the output is available
+
+        } else {   //Classic streaming writer, flush the buffer whenever the output is available
 
             BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, "utf8"));
 
@@ -184,25 +214,26 @@ public class OntopQuery extends OntopReasoningCommandBase {
             }
             wr.newLine();
 
-            while (result.hasNext()) {
-                final OWLBindingSet bindingSet = result.next();
-                ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
-                for (String columnName : signature) {
-                    // TODO: make it robust to NULLs
-                    valueListBuilder.add(ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(columnName)));
+            try {
+                while (result.hasNext()) {
+                    final OWLBindingSet bindingSet = result.next();
+                    ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
+                    for (String columnName : signature) {
+                        // TODO: make it robust to NULLs
+                        valueListBuilder.add(ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(columnName)));
+                    }
+                    wr.append(String.join(",", valueListBuilder.build()));
+                    wr.newLine();
+
+                    // Force the Flush operation every new row (non-temporized buffer)
+                    // TODO: check efficiency of repeated flushes
+                    wr.flush();
                 }
-                wr.append(String.join(",", valueListBuilder.build()));
-                wr.newLine();
-
-                // Force the Flush operation every new row (non-temporized buffer)
-                // TODO: check efficiency of repeated flushes
                 wr.flush();
+            } catch (OntopOWLException e) {
+                System.out.println("CONNECTION CLOSED");
             }
-            wr.flush();
+            result.close();
         }
-
-        result.close();
     }
-
-
 }
