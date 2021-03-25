@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.input.impl;
 
 
 import com.google.inject.Inject;
+import it.polimi.deib.sr.rsp.api.querying.ContinuousQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
@@ -12,8 +13,8 @@ public class RSP4JInputQueryFactoryImpl implements RSP4JInputQueryFactory {
     }
 
     @Override
-    public SelectQuery createSelectQuery(String queryString, ParsedQuery parsedQuery) {
-        return new RSP4JSelectQuery(parsedQuery, queryString);
+    public SelectQuery createSelectQuery(String queryString, ParsedQuery parsedQuery, ContinuousQuery parsedCQ) {
+        return new RSP4JSelectQuery(parsedQuery, queryString, parsedCQ);
     }
 
     @Override

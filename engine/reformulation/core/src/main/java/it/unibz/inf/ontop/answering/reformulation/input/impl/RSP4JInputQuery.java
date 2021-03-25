@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.input.impl;
 
 import it.unibz.inf.ontop.answering.reformulation.input.InputQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.InputQueryTranslator;
-import it.unibz.inf.ontop.answering.reformulation.input.translation.RDF4JInputQueryTranslator;
+import it.polimi.deib.sr.rsp.api.querying.ContinuousQuery;
 import it.unibz.inf.ontop.answering.reformulation.input.translation.RSP4JInputQueryTranslator;
 import it.unibz.inf.ontop.answering.resultset.OBDAResultSet;
 import it.unibz.inf.ontop.exception.OntopInvalidInputQueryException;
@@ -10,19 +10,25 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedInputQueryException;
 import it.unibz.inf.ontop.iq.IQ;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
-class RSP4JInputQuery<R extends OBDAResultSet> implements InputQuery<R> {
+public class RSP4JInputQuery<R extends OBDAResultSet> implements InputQuery<R> {
 
     protected final ParsedQuery parsedQuery;
     private final String inputQueryString;
+    private final ContinuousQuery parsedCQ;
 
-    RSP4JInputQuery(ParsedQuery parsedQuery, String inputQueryString) {
+    RSP4JInputQuery(ParsedQuery parsedQuery, String inputQueryString, ContinuousQuery parsedCQ) {
         this.parsedQuery = parsedQuery;
         this.inputQueryString = inputQueryString;
+        this.parsedCQ = parsedCQ;
     }
 
     @Override
     public String getInputString() {
         return inputQueryString;
+    }
+
+    public ContinuousQuery getParsedContinuousQuery(){
+        return parsedCQ;
     }
 
     @Override

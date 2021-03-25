@@ -29,11 +29,7 @@ public class RSPInputQueryFactoryImpl implements InputQueryFactory {
     @Override
     public SelectQuery createSelectQuery(String queryString) throws OntopInvalidInputQueryException {
 
-        ContinuousQuery parse = QueryFactory.parse(queryString);
-
-        //Map<WindowNode, WebStream> iteration
-        parse.getWindowMap().forEach((k, v) -> System.out.println((k.iri() + " "+ k.getRange() + " " +k.getStep()+" | "
-                + v.uri())));
+        ContinuousQuery parsedCQ = QueryFactory.parse(queryString);
 
         queryString = RSPQLtoSPARQL(queryString);
 
@@ -41,14 +37,10 @@ public class RSPInputQueryFactoryImpl implements InputQueryFactory {
 
         System.out.println("xxxxxxxxxx-RSP-PARSED-QUERY-xxxxxxxxxx");
         System.out.println("querystring:\n"+queryString);
-        System.out.println("-----------------------");
-        /*System.out.println("parsedQuery:\n"+parsedQuery);
-        System.out.println("-----------------------");
-        System.out.println("rdf4jFactory.createSelectQuery(queryString, parsedQuery):\n"+rsp4jFactory.createSelectQuery(queryString, parsedQuery));*/
         System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
         if (parsedQuery instanceof ParsedTupleQuery)
-            return rsp4jFactory.createSelectQuery(queryString, parsedQuery);
+            return rsp4jFactory.createSelectQuery(queryString, parsedQuery, parsedCQ);
         else
             throw new OntopInvalidInputQueryException("Not a valid SELECT query: " + queryString);
     }
@@ -88,8 +80,10 @@ public class RSPInputQueryFactoryImpl implements InputQueryFactory {
             throws OntopInvalidInputQueryException, OntopUnsupportedInputQueryException {
         ParsedQuery parsedQuery = parseQueryString(queryString);
 
+        ContinuousQuery parsedCQ = QueryFactory.parse(queryString);
+
         if (parsedQuery instanceof ParsedTupleQuery)
-            return rsp4jFactory.createSelectQuery(queryString, parsedQuery);
+            return rsp4jFactory.createSelectQuery(queryString, parsedQuery, parsedCQ);
         else if (parsedQuery instanceof ParsedBooleanQuery)
             return rsp4jFactory.createAskQuery(queryString, parsedQuery);
         else if (parsedQuery instanceof ParsedGraphQuery)
@@ -148,13 +142,9 @@ public class RSPInputQueryFactoryImpl implements InputQueryFactory {
             m = balancedCurlyBrackets.matcher(RSPQLquery);
             while(m.find()) {
                 RSPQLquery = RSPQLquery.replace(m.group(),
-                        m.group().replaceFirst(windowHeader, "") + " UNION ");
+                        m.group().replaceFirst(windowHeader, "") + " ");
             }
         }
-
-        //remove the last "UNION" which is wrong
-        final String unionError = "UNION(\\s*)}";
-        RSPQLquery = RSPQLquery.replaceAll(unionError, "}");
 
         return RSPQLquery;
     }

@@ -13,6 +13,7 @@ import java.io.IOException;
 
 public class RelationIDImpl implements RelationID {
     private final QuotedID schema, table;
+    private QuotedID  rowtime;
 
     /**
      * (used only in QuotedIDFactory implementations)
@@ -24,6 +25,7 @@ public class RelationIDImpl implements RelationID {
     RelationIDImpl(QuotedID schema, QuotedID table) {
         this.schema = schema;
         this.table = table;
+        this.rowtime = null;
     }
 
     /**
@@ -90,6 +92,14 @@ public class RelationIDImpl implements RelationID {
         }
 
         return false;
+    }
+
+    public void setRowtime(QuotedID attributeId){
+        this.rowtime = attributeId;
+    }
+
+    public QuotedID getRowtime(){
+        return rowtime;
     }
 
     public static class RelationIDSerializer extends JsonSerializer<RelationID> {

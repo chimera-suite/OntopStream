@@ -10,7 +10,6 @@ import org.eclipse.rdf4j.query.QueryLanguage;
 import org.eclipse.rdf4j.query.parser.*;
 
 
-
 public class RDFInputQueryFactoryImpl implements InputQueryFactory {
 
     private final RDF4JInputQueryFactory rdf4jFactory;
@@ -23,14 +22,6 @@ public class RDFInputQueryFactoryImpl implements InputQueryFactory {
     @Override
     public SelectQuery createSelectQuery(String queryString) throws OntopInvalidInputQueryException {
         ParsedQuery parsedQuery = parseQueryString(queryString);
-
-        System.out.println("YYYYYYYYYYY-PARSED-QUERY-YYYYYYYYYYYYYY");
-        System.out.println("querystring:\n"+queryString);
-        System.out.println("-----------------------");
-        System.out.println("parsedQuery:\n"+parsedQuery);
-        System.out.println("-----------------------");
-        System.out.println("rdf4jFactory.createSelectQuery(queryString, parsedQuery):\n"+rdf4jFactory.createSelectQuery(queryString, parsedQuery));
-        System.out.println("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY");
 
         if (parsedQuery instanceof ParsedTupleQuery)
             return rdf4jFactory.createSelectQuery(queryString, parsedQuery);

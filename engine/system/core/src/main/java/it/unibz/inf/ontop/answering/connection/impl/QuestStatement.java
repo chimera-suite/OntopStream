@@ -1,11 +1,13 @@
 package it.unibz.inf.ontop.answering.connection.impl;
 
 import com.google.common.collect.ImmutableSet;
+import it.polimi.deib.sr.rsp.api.querying.ContinuousQuery;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.answering.logging.impl.QueryLoggerImpl;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
+import it.unibz.inf.ontop.answering.reformulation.RSPQueryReformulator;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
+import it.unibz.inf.ontop.answering.reformulation.input.impl.RSP4JInputQuery;
 import it.unibz.inf.ontop.answering.resultset.*;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
@@ -296,7 +298,11 @@ public abstract class QuestStatement implements OntopStatement {
 		QueryLogger queryLogger = queryLoggerFactory.create();
 
 		CountDownLatch monitor = new CountDownLatch(1);
-		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryLogger);
+
+		System.out.println("DA SISTEMARE (CON APPOSITA CLASSE - QuestStatement.executeInThread()");
+		ContinuousQuery parsedCQ = ((RSP4JInputQuery) inputQuery).getParsedContinuousQuery();
+
+		IQ executableQuery = ((RSPQueryReformulator)engine).reformulateIntoNativeQuery(inputQuery, queryLogger,parsedCQ);
 
 		QueryExecutionThread<R, Q> executionthread = new QueryExecutionThread<>(inputQuery, executableQuery, queryLogger, evaluator,
 				monitor);
@@ -355,7 +361,11 @@ public abstract class QuestStatement implements OntopStatement {
 
 	@Override
 	public IQ getExecutableQuery(InputQuery inputQuery) throws OntopReformulationException {
-			return engine.reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create());
+
+		System.out.println("DA SISTEMARE (CON APPOSITA CLASSE - QuestStatement.getExecutableQuery()");
+		ContinuousQuery parsedCQ = ((RSP4JInputQuery) inputQuery).getParsedContinuousQuery();
+
+		return ((RSPQueryReformulator)engine).reformulateIntoNativeQuery(inputQuery, queryLoggerFactory.create(), parsedCQ);
 	}
 
 }
