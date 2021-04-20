@@ -58,4 +58,8 @@ public interface RelationID {
 	 * @return SQL rendering of the name (possibly with quotation marks)
 	 */
 	String getSQLRendering();
+
+	void setRowtime(QuotedID attributeId);
+
+	QuotedID getRowtime();
 }

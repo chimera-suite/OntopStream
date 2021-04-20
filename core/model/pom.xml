@@ -71,6 +71,12 @@
             <groupId>io.mikael</groupId>
             <artifactId>urlbuilder</artifactId>
         </dependency>
+        <dependency>
+            <groupId>it.polimi.sr.rsp</groupId>
+            <artifactId>api</artifactId>
+            <version>1.0.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 

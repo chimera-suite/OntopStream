@@ -40,6 +40,8 @@ public interface DatabaseRelationDefinition extends RelationDefinition {
 
 	Optional<UniqueConstraint> getPrimaryKey();
 
+	Optional<UniqueConstraint> getRowtime();
+
 
 	void addFunctionalDependency(FunctionalDependency constraint);
 

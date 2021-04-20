@@ -17,7 +17,8 @@ public abstract class AbstractDatabaseRelationDefinition extends AbstractRelatio
     private final RelationID id;
     private final ImmutableSet<RelationID> allIds;
 
-    private UniqueConstraint primaryKey; // nullable
+    private UniqueConstraint primaryKey;   // nullable
+    private UniqueConstraint rowTime;   // nullable
     private final List<UniqueConstraint> uniqueConstraints = new LinkedList<>();
     private final List<FunctionalDependency> otherFunctionalDependencies = new ArrayList<>();
     private final List<ForeignKeyConstraint> foreignKeys = new ArrayList<>();
@@ -62,6 +63,9 @@ public abstract class AbstractDatabaseRelationDefinition extends AbstractRelatio
                     throw new IllegalArgumentException("Duplicate PK " + primaryKey + " " + uc);
                 primaryKey = uc;
             }
+            if (uc.isRowtime()) {
+                rowTime = uc;
+            }
             uniqueConstraints.add(uc);
         }
         else
@@ -80,6 +84,15 @@ public abstract class AbstractDatabaseRelationDefinition extends AbstractRelatio
     @Override
     public Optional<UniqueConstraint> getPrimaryKey() {
         return Optional.ofNullable(primaryKey);
+    }
+
+    /**
+     * @return rowtime
+     */
+    @JsonIgnore
+    @Override
+    public Optional<UniqueConstraint> getRowtime() {
+        return Optional.ofNullable(rowTime);
     }
 
 

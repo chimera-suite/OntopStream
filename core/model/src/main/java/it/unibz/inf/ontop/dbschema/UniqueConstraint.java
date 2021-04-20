@@ -54,6 +54,14 @@ public interface UniqueConstraint extends FunctionalDependency {
 	boolean isPrimaryKey();
 
 	/**
+	 * return true if it is a rowtime and false otherwise
+	 *
+	 * @return true if it is a rowtime constraint (false otherwise)
+	 */
+
+	boolean isRowtime();
+
+	/**
 	 * return the list of attributes in the unique constraint
 	 *
 	 * @return list of attributes
@@ -86,6 +94,18 @@ public interface UniqueConstraint extends FunctionalDependency {
 		return UniqueConstraintImpl.primaryKeyBuilder(relation, name);
 	}
 
+
+	/**
+	 * creates a ROWTIME  builder
+	 *
+	 * @param relation
+	 * @param name
+	 * @return
+	 */
+
+	static Builder rowtimeBuilder(DatabaseRelationDefinition relation, String name) {
+		return UniqueConstraintImpl.rowtimeBuilder(relation, name);
+	}
 
 	static void primaryKeyOf(Attribute attribute) {
 		DatabaseRelationDefinition relation = (DatabaseRelationDefinition)attribute.getRelation();

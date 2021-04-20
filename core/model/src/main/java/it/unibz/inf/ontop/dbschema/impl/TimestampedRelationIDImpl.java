@@ -8,10 +8,11 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.dbschema.TimestampedRelationID;
 
 import java.io.IOException;
 
-public class RelationIDImpl implements RelationID {
+public class TimestampedRelationIDImpl implements TimestampedRelationID {
     private final QuotedID schema, table;
     private QuotedID  rowtime;
 
@@ -22,7 +23,7 @@ public class RelationIDImpl implements RelationID {
      * @param table
      */
 
-    RelationIDImpl(QuotedID schema, QuotedID table) {
+    TimestampedRelationIDImpl(QuotedID schema, QuotedID table) {
         this.schema = schema;
         this.table = table;
         this.rowtime = null;
@@ -37,7 +38,7 @@ public class RelationIDImpl implements RelationID {
     public ImmutableList<RelationID> getWithSchemalessID() {
         return (schema.getName() == null)
                 ? ImmutableList.of(this)
-                : ImmutableList.of(new RelationIDImpl(QuotedIDImpl.EMPTY_ID, table), this);
+                : ImmutableList.of(new TimestampedRelationIDImpl(QuotedIDImpl.EMPTY_ID, table), this);
     }
 
 
@@ -86,8 +87,8 @@ public class RelationIDImpl implements RelationID {
         if (this == obj)
             return true;
 
-        if (obj instanceof RelationIDImpl) {
-            RelationIDImpl other = (RelationIDImpl)obj;
+        if (obj instanceof TimestampedRelationIDImpl) {
+            TimestampedRelationIDImpl other = (TimestampedRelationIDImpl)obj;
             return (this.schema.equals(other.schema) && this.table.equals(other.table));
         }
 
@@ -112,3 +113,4 @@ public class RelationIDImpl implements RelationID {
         }
     }
 }
+

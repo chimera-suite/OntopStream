@@ -41,6 +41,9 @@ public class FlinkSQLDBMetadataProvider extends  DefaultDBMetadataProvider{
         try (ResultSet rs = metadata.getColumns(getRelationCatalog(id), getRelationSchema(id), getRelationName(id), null)) {
             Map<RelationID, RelationDefinition.AttributeListBuilder> relations = new HashMap<>();
 
+            String rowtimeName = null;
+            QuotedID rowtime = null;
+
             while (rs.next()) {
                 RelationID extractedId = getRelationID(rs);
                 checkSameRelationID(extractedId, id);
@@ -56,7 +59,9 @@ public class FlinkSQLDBMetadataProvider extends  DefaultDBMetadataProvider{
 
                 // Set the rowtime for the table. TODO: check with two timestamps in a single table
                 if (typeName.contains("TIMESTAMP")) {
-                    ((RelationIDImpl) id).setRowtime(attributeId);
+                    id.setRowtime(attributeId);
+                    rowtimeName = attributeId.getName();
+                    rowtime = attributeId;
                 }
 
                 DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
@@ -68,8 +73,18 @@ public class FlinkSQLDBMetadataProvider extends  DefaultDBMetadataProvider{
                 throw new MetadataExtractionException("Cannot find relation id: " + id);
             }
             else if (relations.entrySet().size() == 1) {
-                Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
-                return new DatabaseTableDefinition(getRelationAllIDs(r.getKey()), r.getValue());
+                try {
+                    Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
+                    DatabaseRelationDefinition table = new DatabaseTableDefinition(getRelationAllIDs(r.getKey()), r.getValue());
+
+                    UniqueConstraint.Builder builderX = UniqueConstraint.rowtimeBuilder(table, rowtimeName);
+                    builderX.addDeterminant(rowtime).build();
+
+                    return table;
+                } catch (AttributeNotFoundException e) {
+                        e.printStackTrace();
+                }
+
             }
             throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }

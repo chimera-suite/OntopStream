@@ -98,7 +98,7 @@ public class FlinkSelectFromWhereSerializer implements RSPSelectFromWhereSeriali
                     .map(s -> String.format("WHERE %s\n", s))
                     .orElse("");
 
-            String groupByString = serializeGroupBy(selectFromWhere.getGroupByVariables(), columnIDs, fromString, isLeafQuery);
+            String groupByString = serializeGroupBy(selectFromWhere.getGroupByVariables(), columnIDs, /*fromString*/ selectFromWhere.getFromSQLExpression(), isLeafQuery);
 
             String orderByString = serializeOrderBy(selectFromWhere.getSortConditions(), columnIDs);
             String sliceString = serializeSlice(selectFromWhere.getLimit(), selectFromWhere.getOffset());
@@ -177,7 +177,8 @@ public class FlinkSelectFromWhereSerializer implements RSPSelectFromWhereSeriali
          */
         protected String serializeGroupBy(ImmutableSet<Variable> groupByVariables,
                                           ImmutableMap<Variable, QualifiedAttributeID> columnIDs,
-                                          String fromString,
+                                          //String fromString, TODO: REMOVE (OLD)
+                                          SQLExpression fromSQLExpression,
                                           Boolean isLeafQuery) {
             if(isLeafQuery && !(parsedCQ.getWindowMap().isEmpty())){
 
@@ -194,23 +195,26 @@ public class FlinkSelectFromWhereSerializer implements RSPSelectFromWhereSeriali
                         .map(e -> e.getValue().toString())
                         .collect(Collectors.joining(","));
 
-                ArrayList<String> rowTimes = new ArrayList<>();
-                rowTimes= getRowTimes(extractTables(fromString));
+                /*ArrayList<String> rowTimes = new ArrayList<>(); TODO: REMOVE (OLD)
+                rowTimes= getRowTimes(extractTables(fromString));*/
+                QuotedID rowTime = extractRowtime(fromSQLExpression);
 
-                // Debug prints TODO:REMOVE
-                System.out.println(variableString + "  --->   ROWTIMES: " + rowTimes);
-                System.out.println("RANGE-TIME: "+millisecondToFlinkTime(node.getRange()));
+                // Debug prints TODO: REMOVE (OLD)
+                /*System.out.println(variableString + "  --->   ROWTIMES: " + rowTimes);
+                System.out.println("RANGE-TIME: "+millisecondToFlinkTime(node.getRange()));*/
 
                 String range = millisecondToFlinkTime(node.getRange());
                 String step = millisecondToFlinkTime(node.getStep());
                 if(range.equals(step)){  // tumble window
-                    for (int i = 0; i < rowTimes.size(); i++){
-                        variableString += ",TUMBLE("+rowTimes.get(i)+", INTERVAL " + range + ")";
-                    }
+                    variableString += ",TUMBLE("+rowTime+", INTERVAL " + range + ")";
+                    /*for (int i = 0; i < rowTimes.size(); i++){
+                        variableString += ",TUMBLE("+rowTimes.get(i)+", INTERVAL " + range + ")"; TODO: REMOVE (OLD)
+                    }*/
                 } else { //hopping window
-                    for (int i = 0; i < rowTimes.size(); i++){
-                        variableString += ",HOP("+rowTimes.get(i)+", INTERVAL " + step + ", INTERVAL " + range + ")";
-                    }
+                    variableString += ",HOP("+rowTime+", INTERVAL " + step + ", INTERVAL " + range + ")";
+                    /*for (int i = 0; i < rowTimes.size(); i++){
+                        variableString += ",HOP("+rowTimes.get(i)+", INTERVAL " + step + ", INTERVAL " + range + ")"; TODO: REMOVE (OLD)
+                    }*/
                 }
 
                 return String.format("GROUP BY %s\n", variableString);
@@ -226,7 +230,12 @@ public class FlinkSelectFromWhereSerializer implements RSPSelectFromWhereSeriali
             return String.format("GROUP BY %s\n", variableString);
         }
 
-        private ArrayList<String> extractTables(String fromString){
+        private QuotedID extractRowtime(SQLExpression expression){
+            String name = ((DatabaseRelationDefinition) ((SQLTable)expression).getRelationDefinition()).getRowtime().get().getName();
+            return idFactory.createAttributeID(name);
+        }
+
+        /*private ArrayList<String> extractTables(String fromString){  TODO: REMOVE (OLD)
             ArrayList<String> tables = new ArrayList<>();
             String[] parts = fromString.split(" ");
 
@@ -235,7 +244,7 @@ public class FlinkSelectFromWhereSerializer implements RSPSelectFromWhereSeriali
             return tables;
         }
 
-        private ArrayList<String> getRowTimes(ArrayList<String> tables) {
+        private ArrayList<String> getRowTimes(ArrayList<String> tables) {   TODO: REMOVE (OLD)
             ArrayList<String> rowTimes = new ArrayList<>();
 
             for (int i = 0; i < tables.size(); i++){
@@ -250,7 +259,7 @@ public class FlinkSelectFromWhereSerializer implements RSPSelectFromWhereSeriali
                 }
             }
             return  rowTimes;
-        }
+        }*/
 
         private String millisecondToFlinkTime(long time){
             String flinkTime = "";

@@ -55,7 +55,7 @@ public class UniqueConstraintImpl implements UniqueConstraint {
             if (pk.isPresent() && pk.get().getAttributes().equals(attributes))
                 return; // ignore a unique constraint with the same attributes as the primary key
 
-            relation.addFunctionalDependency(new UniqueConstraintImpl(name, false, attributes));
+            relation.addFunctionalDependency(new UniqueConstraintImpl(name, false, false, attributes));
         }
     }
 
@@ -91,9 +91,46 @@ public class UniqueConstraintImpl implements UniqueConstraint {
             if (attributes.isEmpty())
                 throw new IllegalArgumentException("PK cannot have no attributes");
 
-            relation.addFunctionalDependency(new UniqueConstraintImpl(name, true, attributes));
+            relation.addFunctionalDependency(new UniqueConstraintImpl(name, true, false, attributes));
         }
     }
+
+    private static class RowtimeBuilder extends UniqueConstraintBuilder {
+
+        private RowtimeBuilder(DatabaseRelationDefinition relation, String name) {
+            super(relation, name);
+        }
+
+        @Override
+        public Builder addDeterminant(int determinantIndex) {
+            Attribute attribute = relation.getAttribute(determinantIndex);
+            /*if (attribute.isNullable())
+                throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be a Rowtime");*/
+
+            builder.add(attribute);
+            return this;
+        }
+
+        @Override
+        public Builder addDeterminant(QuotedID determinantId) throws AttributeNotFoundException {
+            Attribute attribute = relation.getAttribute(determinantId);
+            /*if (attribute.isNullable())
+                throw new IllegalArgumentException("Nullable attribute " + attribute + " cannot be a Rowtime");*/
+
+            builder.add(attribute);
+            return this;
+        }
+
+        @Override
+        public void build() {
+            ImmutableList<Attribute> attributes = builder.build();
+            if (attributes.isEmpty())
+                throw new IllegalArgumentException("Rowtime cannot have no attributes");
+
+            relation.addFunctionalDependency(new UniqueConstraintImpl(name, false, true, attributes));
+        }
+    }
+
 
     /**
      * creates a UNIQUE constraint builder
@@ -119,9 +156,15 @@ public class UniqueConstraintImpl implements UniqueConstraint {
         return new PrimaryKeyBuilder(relation, name);
     }
 
+
+    public static Builder rowtimeBuilder(DatabaseRelationDefinition relation, String name) {
+        return new RowtimeBuilder(relation, name);
+    }
+
     private final String name;
     private final ImmutableList<Attribute> attributes;
     private final boolean isPrimaryKey;
+    private final boolean isRowtime;
 
     /**
      * private constructor (use Builder instead)
@@ -130,9 +173,10 @@ public class UniqueConstraintImpl implements UniqueConstraint {
      * @param attributes
      */
 
-    private UniqueConstraintImpl(String name, boolean isPrimaryKey, ImmutableList<Attribute> attributes) {
+    private UniqueConstraintImpl(String name, boolean isPrimaryKey, boolean isRowtime, ImmutableList<Attribute> attributes) {
         this.name = name;
         this.isPrimaryKey = isPrimaryKey;
+        this.isRowtime = isRowtime;
         this.attributes = attributes;
     }
 
@@ -157,6 +201,18 @@ public class UniqueConstraintImpl implements UniqueConstraint {
     @Override
     public boolean isPrimaryKey() {
         return isPrimaryKey;
+    }
+
+    /**
+     * return true if it is a rowtime and false otherwise
+     *
+     * @return true if it is a rowtime constraint (false otherwise)
+     */
+
+    @JsonProperty("isPrimaryKey")
+    @Override
+    public boolean isRowtime() {
+        return isRowtime;
     }
 
     /**
