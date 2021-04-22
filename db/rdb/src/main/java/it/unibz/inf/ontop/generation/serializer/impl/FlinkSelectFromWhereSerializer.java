@@ -393,7 +393,7 @@ public class FlinkSelectFromWhereSerializer implements RSPSelectFromWhereSeriali
             if (expression instanceof SelectFromWhereWithModifiers) {
                 QuerySerialization serialization = expression.acceptVisitor(this);
                 RelationID alias = generateFreshViewAlias();
-                String sql = String.format("(%s) %s", serialization.getString(), alias.getSQLRendering());
+                String sql = String.format("LATERAL (%s) %s", serialization.getString(), alias.getSQLRendering());
                 return new QuerySerializationImpl(sql,
                         replaceRelationAlias(alias, serialization.getColumnIDs()));
             }
