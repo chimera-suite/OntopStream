@@ -52,18 +52,23 @@ public class FlinkSQLDBMetadataProvider extends  DefaultDBMetadataProvider{
                         i -> DatabaseTableDefinition.attributeListBuilder());
 
                 QuotedID attributeId = rawIdFactory.createAttributeID(rs.getString("COLUMN_NAME"));
-                // columnNoNulls, columnNullable, columnNullableUnknown
+
                 boolean isNullable = rs.getInt("NULLABLE") != DatabaseMetaData.columnNoNulls;
                 String typeName = rs.getString("TYPE_NAME");
                 int columnSize = rs.getInt("COLUMN_SIZE");
+                String remarks =  rs.getString("REMARKS");
 
-                // Set the rowtime for the table. TODO: check with two timestamps in a single table
-                if (typeName.contains("TIMESTAMP")) {
+                //TODO: remove
+                System.out.println("ONTOP-READING: "+ attributeId + " " + typeName + " " + columnSize +" " + isNullable + " " + remarks);
+
+                // Set the RowTime for the table (Apache Flink supports up to one Watermark per table)
+                if (remarks.equals("*ROWTIME*")) {
                     id.setRowtime(attributeId);
                     rowtimeName = attributeId.getName();
                     rowtime = attributeId;
                 }
 
+                // Create the DBTermtype instance
                 DBTermType termType = dbTypeFactory.getDBTermType(typeName, columnSize);
 
                 builder.addAttribute(attributeId, termType, typeName, isNullable);
