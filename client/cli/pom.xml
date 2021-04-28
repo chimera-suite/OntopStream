@@ -9,13 +9,6 @@
 
     <artifactId>ontop-cli</artifactId>
 
-    <!--<repositories>
-        <repository>
-            <id>jitpack.io</id>
-            <url>https://jitpack.io</url>
-        </repository>
-    </repositories>-->
-
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -27,37 +20,11 @@
             <artifactId>ontop-rdf4j</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--<dependency>
-            <groupId>it.polimi.sr.rsp</groupId>
-            <artifactId>rsp4j</artifactId>
-            <version>1.0.0</version>
-        </dependency>-->
         <dependency>
             <groupId>it.polimi.sr.rsp</groupId>
             <artifactId>api</artifactId>
             <version>1.0.0</version>
         </dependency>
-        <!--<dependency>
-            <groupId>it.polimi.sr.rsp</groupId>
-            <artifactId>yasper</artifactId>
-            <version>1.0.0</version>
-        </dependency>-->
-        <!--<dependency>
-            <groupId>com.github.streamreasoning.rsp4j</groupId>
-            <artifactId>api</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.streamreasoning.rsp4j</groupId>
-            <artifactId>yasper</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>it.polimi.sr.rsp</groupId>
-            <artifactId>yasper</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
-        </dependency>-->
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>ontop-mapping-sql-all</artifactId>
