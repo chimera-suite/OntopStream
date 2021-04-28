@@ -80,16 +80,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.streamreasoning.rsp4j</groupId>
-            <artifactId>api</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.streamreasoning.rsp4j</groupId>
-            <artifactId>yasper</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>it.polimi.sr.rsp</groupId>
             <artifactId>yasper</artifactId>
             <version>1.0.0</version>
