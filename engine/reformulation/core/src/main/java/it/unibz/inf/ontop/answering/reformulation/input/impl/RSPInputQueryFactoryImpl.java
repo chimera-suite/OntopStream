@@ -29,6 +29,7 @@ public class RSPInputQueryFactoryImpl implements InputQueryFactory {
     @Override
     public SelectQuery createSelectQuery(String queryString) throws OntopInvalidInputQueryException {
 
+        String RSP4JqueryString = queryString;
         ContinuousQuery parsedCQ = QueryFactory.parse(queryString);
 
         queryString = RSPQLtoSPARQL(queryString);
@@ -39,10 +40,13 @@ public class RSPInputQueryFactoryImpl implements InputQueryFactory {
         System.out.println("querystring:\n"+queryString);
         System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 
-        if (parsedQuery instanceof ParsedTupleQuery)
+        if (parsedQuery instanceof ParsedTupleQuery) {
+            if (parsedCQ.getWindowMap().size() > 1) {
+                throw new OntopInvalidInputQueryException("Too many windows (Max support is 1)\n" + RSP4JqueryString);
+            }
             return rsp4jFactory.createSelectQuery(queryString, parsedQuery, parsedCQ);
-        else
-            throw new OntopInvalidInputQueryException("Not a valid SELECT query: " + queryString);
+        } else
+            throw new OntopInvalidInputQueryException("Not a valid SELECT query\n" + queryString);
     }
 
     @Override

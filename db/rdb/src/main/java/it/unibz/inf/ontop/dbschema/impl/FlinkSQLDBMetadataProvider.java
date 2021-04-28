@@ -64,7 +64,6 @@ public class FlinkSQLDBMetadataProvider extends  DefaultDBMetadataProvider{
                 // Set the RowTime for the table (Apache Flink supports up to one Watermark per table)
                 if (remarks.equals("*ROWTIME*")) {
                     id.setRowtime(attributeId);
-                    rowtimeName = attributeId.getName();
                     rowtime = attributeId;
                 }
 
@@ -82,14 +81,15 @@ public class FlinkSQLDBMetadataProvider extends  DefaultDBMetadataProvider{
                     Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
                     DatabaseRelationDefinition table = new DatabaseTableDefinition(getRelationAllIDs(r.getKey()), r.getValue());
 
-                    UniqueConstraint.Builder builderX = UniqueConstraint.rowtimeBuilder(table, rowtimeName);
-                    builderX.addDeterminant(rowtime).build();
+                    if(rowtime != null) {
+                        UniqueConstraint.Builder builderX = UniqueConstraint.rowtimeBuilder(table, rowtime.getName());
+                        builderX.addDeterminant(rowtime).build();
+                    }
 
                     return table;
                 } catch (AttributeNotFoundException e) {
                         e.printStackTrace();
                 }
-
             }
             throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }

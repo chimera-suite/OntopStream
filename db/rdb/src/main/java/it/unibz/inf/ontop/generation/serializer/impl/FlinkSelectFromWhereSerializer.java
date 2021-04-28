@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -181,43 +182,28 @@ public class FlinkSelectFromWhereSerializer implements RSPSelectFromWhereSeriali
                                           SQLExpression fromSQLExpression,
                                           Boolean isLeafQuery) {
             if(isLeafQuery && !(parsedCQ.getWindowMap().isEmpty())){
-
-                //TODO: evaluate which window is the right one to use
-                Map<WindowNode, WebStream> windowMap = (Map<WindowNode, WebStream>) parsedCQ.getWindowMap();
-                /*windowMap.forEach((k, v) -> System.out.println((k.iri() + " "+ millisecondToFlinkTime(k.getRange()) + " " +k.getStep()+" | "
-                        + v.uri())));*/
-                Map.Entry<WindowNode, WebStream> entry = windowMap.entrySet().iterator().next();
-                WindowNode node = entry.getKey();
-                //WebStream value = entry.getValue();
-
-                String variableString = columnIDs.entrySet()
-                        .stream()
-                        .map(e -> e.getValue().toString())
-                        .collect(Collectors.joining(","));
-
-                /*ArrayList<String> rowTimes = new ArrayList<>(); TODO: REMOVE (OLD)
-                rowTimes= getRowTimes(extractTables(fromString));*/
                 QuotedID rowTime = extractRowtime(fromSQLExpression);
+                if(rowTime != null) {
+                    Map<WindowNode, WebStream> windowMap = (Map<WindowNode, WebStream>) parsedCQ.getWindowMap();
 
-                // Debug prints TODO: REMOVE (OLD)
-                /*System.out.println(variableString + "  --->   ROWTIMES: " + rowTimes);
-                System.out.println("RANGE-TIME: "+millisecondToFlinkTime(node.getRange()));*/
+                    Map.Entry<WindowNode, WebStream> entry = windowMap.entrySet().iterator().next();
+                    WindowNode node = entry.getKey();
 
-                String range = millisecondToFlinkTime(node.getRange());
-                String step = millisecondToFlinkTime(node.getStep());
-                if(range.equals(step)){  // tumble window
-                    variableString += ",TUMBLE("+rowTime+", INTERVAL " + range + ")";
-                    /*for (int i = 0; i < rowTimes.size(); i++){
-                        variableString += ",TUMBLE("+rowTimes.get(i)+", INTERVAL " + range + ")"; TODO: REMOVE (OLD)
-                    }*/
-                } else { //hopping window
-                    variableString += ",HOP("+rowTime+", INTERVAL " + step + ", INTERVAL " + range + ")";
-                    /*for (int i = 0; i < rowTimes.size(); i++){
-                        variableString += ",HOP("+rowTimes.get(i)+", INTERVAL " + step + ", INTERVAL " + range + ")"; TODO: REMOVE (OLD)
-                    }*/
+                    String variableString = columnIDs.entrySet()
+                            .stream()
+                            .map(e -> e.getValue().toString())
+                            .collect(Collectors.joining(","));
+
+                    String range = millisecondToFlinkTime(node.getRange());
+                    String step = millisecondToFlinkTime(node.getStep());
+                    if (range.equals(step)) {  // tumble window
+                        variableString += ",TUMBLE(" + rowTime + ", INTERVAL " + range + ")";
+                    } else { //hopping window
+                        variableString += ",HOP(" + rowTime + ", INTERVAL " + step + ", INTERVAL " + range + ")";
+                    }
+
+                    return String.format("GROUP BY %s\n", variableString);
                 }
-
-                return String.format("GROUP BY %s\n", variableString);
             }
 
             if (groupByVariables.isEmpty())
@@ -231,35 +217,13 @@ public class FlinkSelectFromWhereSerializer implements RSPSelectFromWhereSeriali
         }
 
         private QuotedID extractRowtime(SQLExpression expression){
-            String name = ((DatabaseRelationDefinition) ((SQLTable)expression).getRelationDefinition()).getRowtime().get().getName();
-            return idFactory.createAttributeID(name);
-        }
-
-        /*private ArrayList<String> extractTables(String fromString){  TODO: REMOVE (OLD)
-            ArrayList<String> tables = new ArrayList<>();
-            String[] parts = fromString.split(" ");
-
-            for( int i = 0; i <= parts.length - 1; i=i+2)
-                tables.add(parts[i]);
-            return tables;
-        }
-
-        private ArrayList<String> getRowTimes(ArrayList<String> tables) {   TODO: REMOVE (OLD)
-            ArrayList<String> rowTimes = new ArrayList<>();
-
-            for (int i = 0; i < tables.size(); i++){
-                if (tables.get(i).equals("`Rides`")) {
-                    rowTimes.add(new String("`rideTime`"));
-                } else if (tables.get(i).equals("`Fares`")) {
-                    rowTimes.add(new String("`payTime`"));
-                } else if (tables.get(i).equals("`DriverChanges`")) {
-                    rowTimes.add(new String("`usageStartTime`"));
-                } else {
-                    throw new UnsupportedOperationException("WRONG TABLE!!!");
-                }
+            try {
+                String name = ((DatabaseRelationDefinition) ((SQLTable) expression).getRelationDefinition()).getRowtime().get().getName();
+                return idFactory.createAttributeID(name);
+            } catch (NoSuchElementException e){
+                return null;
             }
-            return  rowTimes;
-        }*/
+        }
 
         private String millisecondToFlinkTime(long time){
             String flinkTime = "";
