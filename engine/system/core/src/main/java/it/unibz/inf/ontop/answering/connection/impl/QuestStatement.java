@@ -299,7 +299,6 @@ public abstract class QuestStatement implements OntopStatement {
 
 		CountDownLatch monitor = new CountDownLatch(1);
 
-		System.out.println("DA SISTEMARE (CON APPOSITA CLASSE - QuestStatement.executeInThread()");
 		ContinuousQuery parsedCQ = ((RSP4JInputQuery) inputQuery).getParsedContinuousQuery();
 
 		IQ executableQuery = ((RSPQueryReformulator)engine).reformulateIntoNativeQuery(inputQuery, queryLogger,parsedCQ);
