@@ -152,88 +152,50 @@ public class OntopQuery extends OntopReasoningCommandBase {
             System.out.println("CONNECTION CLOSED");
         } catch (Exception e1) {
             e1.printStackTrace();
-
         }
     }
 
     public static void printResult(OutputStream out, TupleOWLResultSet result) throws Exception {
 
-        boolean temporizedWriter = false;
+        BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, "utf8"));
 
-        if (temporizedWriter) {   //Make a buffer flush for each time interval or if the buffer is full (less computation effort)
+        /*
+         * Printing the header
+         */
+        List<String> signature = result.getSignature();
 
-            int time = 10;
-
-            PeriodicFlushingBufferedWriter wr = new PeriodicFlushingBufferedWriter(new OutputStreamWriter(out, "utf8"),time*1000);
-
-            /*
-             * Printing the header
-             */
-            List<String> signature = result.getSignature();
-
-            int columns = result.getColumnCount();
-            for (int c = 0; c < columns; c++) {
-                String value = signature.get(c);
-                wr.append(value);
-                if (c + 1 < columns)
-                    wr.append(",");
-            }
-            wr.newLine();
-
-            try {
-                while (result.hasNext()) {
-                    final OWLBindingSet bindingSet = result.next();
-                    ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
-                    for (String columnName : signature) {
-                        // TODO: make it robust to NULLs
-                        valueListBuilder.add(ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(columnName)));
-                    }
-                    wr.append(String.join(",", valueListBuilder.build()));
-                    wr.newLine();
-                }
-                wr.flush();
-            } catch (OntopOWLException e) {
-                System.out.println("CONNECTION CLOSED");
-            }
-
-        } else {   //Classic streaming writer, flush the buffer whenever the output is available
-
-            BufferedWriter wr = new BufferedWriter(new OutputStreamWriter(out, "utf8"));
-
-            /*
-             * Printing the header
-             */
-            List<String> signature = result.getSignature();
-
-            int columns = result.getColumnCount();
-            for (int c = 0; c < columns; c++) {
-                String value = signature.get(c);
-                wr.append(value);
-                if (c + 1 < columns)
-                    wr.append(",");
-            }
-            wr.newLine();
-
-            try {
-                while (result.hasNext()) {
-                    final OWLBindingSet bindingSet = result.next();
-                    ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
-                    for (String columnName : signature) {
-                        // TODO: make it robust to NULLs
-                        valueListBuilder.add(ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(columnName)));
-                    }
-                    wr.append(String.join(",", valueListBuilder.build()));
-                    wr.newLine();
-
-                    // Force the Flush operation every new row (non-temporized buffer)
-                    // TODO: check efficiency of repeated flushes
-                    wr.flush();
-                }
-                wr.flush();
-            } catch (OntopOWLException e) {
-                System.out.println("CONNECTION CLOSED");
-            }
-            result.close();
+        int columns = result.getColumnCount();
+        for (int c = 0; c < columns; c++) {
+            String value = signature.get(c);
+            wr.append(value);
+            if (c + 1 < columns)
+                wr.append(",");
         }
+        wr.newLine();
+
+        try {
+            while (result.hasNext()) {
+                final OWLBindingSet bindingSet = result.next();
+                ImmutableList.Builder<String> valueListBuilder = ImmutableList.builder();
+                for (String columnName : signature) {
+                    // TODO: make it robust to NULLs
+                    try {
+                        valueListBuilder.add(ToStringRenderer.getInstance().getRendering(bindingSet.getOWLObject(columnName)));
+                    } catch (NullPointerException e) {
+                        valueListBuilder.add("NULL");
+                    }
+                }
+                wr.append(String.join(",", valueListBuilder.build()));
+                wr.newLine();
+
+                // Force the Flush operation every new row (non-temporized buffer)
+                // TODO: check efficiency of repeated flushes
+                wr.flush();
+            }
+            wr.flush();
+        } catch (OntopOWLException e) {
+            System.out.println("CONNECTION CLOSED");
+        }
+        result.close();
     }
 }
