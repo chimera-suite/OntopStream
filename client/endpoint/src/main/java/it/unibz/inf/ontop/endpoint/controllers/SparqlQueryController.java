@@ -3,6 +3,10 @@ package it.unibz.inf.ontop.endpoint.controllers;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import it.unibz.inf.ontop.utils.VersionInfo;
 
+import org.apache.catalina.connector.ClientAbortException;
+import org.apache.catalina.connector.Response;
+import org.apache.http.ConnectionClosedException;
+import org.apache.jena.base.Sys;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriter;
 import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriter;
@@ -102,6 +106,7 @@ public class SparqlQueryController {
         try (RepositoryConnection connection = repository.getConnection()) {
             Query q = connection.prepareQuery(QueryLanguage.SPARQL, query);
             OutputStream bao = response.getOutputStream();
+            streamingMode = (streamingMode == null) ? "unbounded-buffer" : streamingMode;
 
             if (q instanceof TupleQuery) {
                 TupleQuery selectQuery = (TupleQuery) q;
@@ -172,15 +177,15 @@ public class SparqlQueryController {
                 response.setStatus(HttpStatus.BAD_REQUEST.value());
             }
             bao.flush();
-        }
-        catch (IOException ex) {
+        } catch (QueryResultHandlerException e){
+            System.out.println("CLIENT CONNECTION CLOSED");
+        } catch (IOException ex) {
             throw new Error(ex);
         }
     }
 
     private void evaluateSelectQuery(TupleQuery selectQuery, TupleQueryResultWriter writer, HttpServletResponse response, String streamingMode) {
         addCacheHeaders(response);
-        streamingMode = (streamingMode == null) ? "unbounded-buffer" : streamingMode;
 
         TupleQueryResult result = selectQuery.evaluate();
 
@@ -197,7 +202,7 @@ public class SparqlQueryController {
         }
     }
 
-    private void batchResponse(TupleQueryResult result, TupleQueryResultWriter writer, HttpServletResponse response){
+    private void batchResponse(TupleQueryResult result, TupleQueryResultWriter writer, HttpServletResponse response) throws QueryResultHandlerException{
 
         writer.startQueryResult(result.getBindingNames());
 
@@ -211,7 +216,7 @@ public class SparqlQueryController {
                         writer.startQueryResult(result.getBindingNames());
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new QueryResultHandlerException("");
                 }
             }
         }
@@ -225,7 +230,7 @@ public class SparqlQueryController {
         }
     }
 
-    private void individualResponse(TupleQueryResult result, TupleQueryResultWriter writer, HttpServletResponse response){
+    private void individualResponse(TupleQueryResult result, TupleQueryResultWriter writer, HttpServletResponse response) throws QueryResultHandlerException{
         while (result.hasNext()) {
             synchronized (response) {
                 writer.startQueryResult(result.getBindingNames());
@@ -234,13 +239,13 @@ public class SparqlQueryController {
                 try {
                     response.flushBuffer();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new QueryResultHandlerException("");
                 }
             }
         }
     }
 
-    private void unboundedBufferResponse(TupleQueryResult result, TupleQueryResultWriter writer, HttpServletResponse response){
+    private void unboundedBufferResponse(TupleQueryResult result, TupleQueryResultWriter writer, HttpServletResponse response) throws QueryResultHandlerException{
         writer.startQueryResult(result.getBindingNames());
         while (result.hasNext()) {
             synchronized (response){
@@ -248,7 +253,7 @@ public class SparqlQueryController {
                 try {
                     response.flushBuffer();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    throw new QueryResultHandlerException("");
                 }
             }
         }
