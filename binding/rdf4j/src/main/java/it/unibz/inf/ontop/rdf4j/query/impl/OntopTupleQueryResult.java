@@ -62,9 +62,12 @@ public class OntopTupleQueryResult implements TupleQueryResult {
 	public boolean hasNext() throws QueryEvaluationException {
 		try {
 			return res.hasNext();
-		} catch (Exception e) {
-			throw new QueryEvaluationException(e);
+		} catch (OntopConnectionException e1){
+			System.out.println("CONNECTION CLOSED");
+		} catch (Exception e2) {
+			throw new QueryEvaluationException(e2);
 		}
+		return false;
 	}
 
 	@Override

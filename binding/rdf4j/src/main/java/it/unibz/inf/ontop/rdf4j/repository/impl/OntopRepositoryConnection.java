@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.rdf4j.query.impl.OntopBooleanQuery;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopGraphQuery;
 import it.unibz.inf.ontop.rdf4j.query.impl.OntopTupleQuery;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
+import it.unibz.inf.ontop.rdf4j.utils.RSP4JHelper;
 import org.eclipse.rdf4j.IsolationLevel;
 import org.eclipse.rdf4j.IsolationLevels;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
@@ -383,21 +384,25 @@ public class OntopRepositoryConnection implements org.eclipse.rdf4j.repository.R
     }
 
     @Override
-    public Query prepareQuery(QueryLanguage ql, String queryString, String baseIRI)
+    public Query prepareQuery(QueryLanguage ql, String RSPqueryString, String baseIRI)
             throws RepositoryException, MalformedQueryException {
         if (ql != QueryLanguage.SPARQL)
             throw new MalformedQueryException("SPARQL query expected! ");
 
         long beforeParsing = System.currentTimeMillis();
+
+        // Translation RSP4J --> RDF4J
+        String queryString = RSP4JHelper.RSPQLtoSPARQL(RSPqueryString);
+
         ParsedQuery q = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, queryString, baseIRI);
         LOGGER.debug(String.format("Parsing time: %d ms", System.currentTimeMillis() - beforeParsing));
 
         if (q instanceof ParsedTupleQuery)
-            return new OntopTupleQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
+            return new OntopTupleQuery(RSPqueryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
         else if (q instanceof ParsedBooleanQuery)
-            return new OntopBooleanQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
+            return new OntopBooleanQuery(RSPqueryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
         else if (q instanceof ParsedGraphQuery)
-            return new OntopGraphQuery(queryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
+            return new OntopGraphQuery(RSPqueryString, q, baseIRI, ontopConnection, inputQueryFactory, settings);
         else
             throw new MalformedQueryException("Unrecognized query type. " + queryString);
     }

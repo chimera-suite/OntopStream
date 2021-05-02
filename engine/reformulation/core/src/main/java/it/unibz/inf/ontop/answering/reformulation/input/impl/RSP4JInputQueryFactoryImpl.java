@@ -5,6 +5,7 @@ import it.polimi.deib.sr.rsp.yasper.querying.syntax.QueryFactory;
 
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.answering.reformulation.input.*;
+import org.eclipse.rdf4j.query.MalformedQueryException;
 import org.eclipse.rdf4j.query.parser.ParsedQuery;
 
 public class RSP4JInputQueryFactoryImpl implements RDF4JInputQueryFactory, RSP4JInputQueryFactory{
@@ -24,9 +25,9 @@ public class RSP4JInputQueryFactoryImpl implements RDF4JInputQueryFactory, RSP4J
         ContinuousQuery parsedCQ = QueryFactory.parse(queryString);
 
         //TODO:IMPLEMENT EXCEPTION
-        /*if (parsedCQ.getWindowMap().size() > 1) {
-            throw new OntopInvalidInputQueryException("Too many windows (Max support is 1)\n" + queryString);
-        }*/
+        if (parsedCQ.getWindowMap().size() > 1) {
+            throw new MalformedQueryException("Too many windows (Max support is 1)\n" + queryString);
+        }
 
         return new RSP4JSelectQuery(parsedQuery, queryString, parsedCQ);
     }
