@@ -3,10 +3,12 @@ package it.unibz.inf.ontop.endpoint.controllers;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import it.unibz.inf.ontop.utils.VersionInfo;
 
-import org.apache.catalina.connector.ClientAbortException;
-import org.apache.catalina.connector.Response;
-import org.apache.http.ConnectionClosedException;
-import org.apache.jena.base.Sys;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.util.Literals;
+import org.eclipse.rdf4j.model.vocabulary.XSD;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriter;
 import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriter;
@@ -37,6 +39,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.springframework.http.HttpHeaders.ACCEPT;
@@ -71,8 +74,9 @@ public class SparqlQueryController {
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
             @RequestParam(value = "named-graph-uri", required = false) String[] namedGraphUri,
             @RequestParam(value = "streaming-mode", required = false) String streamingMode,
+            @RequestParam(value = "json", required = false) String JSONmode,
             HttpServletResponse response) {
-        execQuery(accept, query, defaultGraphUri, namedGraphUri, streamingMode, response);
+        execQuery(accept, query, defaultGraphUri, namedGraphUri, streamingMode, JSONmode, response);
     }
 
     @RequestMapping(value = "/sparql",
@@ -84,8 +88,9 @@ public class SparqlQueryController {
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
             @RequestParam(value = "named-graph-uri", required = false) String[] namedGraphUri,
             @RequestParam(value = "streaming-mode", required = false) String streamingMode,
+            @RequestParam(value = "json", required = false) String JSONmode,
             HttpServletResponse response) {
-        execQuery(accept, query, defaultGraphUri, namedGraphUri, streamingMode, response);
+        execQuery(accept, query, defaultGraphUri, namedGraphUri, streamingMode, JSONmode, response);
     }
 
     @RequestMapping(value = "/sparql",
@@ -97,24 +102,29 @@ public class SparqlQueryController {
             @RequestParam(value = "default-graph-uri", required = false) String[] defaultGraphUri,
             @RequestParam(value = "named-graph-uri", required = false) String[] namedGraphUri,
             @RequestParam(value = "streaming-mode", required = false) String streamingMode,
+            @RequestParam(value = "json", required = false) String JSONmode,
             HttpServletResponse response) {
-        execQuery(accept, query, defaultGraphUri, namedGraphUri, streamingMode, response);
+        execQuery(accept, query, defaultGraphUri, namedGraphUri, streamingMode, JSONmode, response);
     }
 
     private void execQuery(String accept, String query, String[] defaultGraphUri, String[] namedGraphUri,
-                           String streamingMode, HttpServletResponse response) {
+                           String streamingMode, String JSONmode, HttpServletResponse response) {
         try (RepositoryConnection connection = repository.getConnection()) {
             Query q = connection.prepareQuery(QueryLanguage.SPARQL, query);
             OutputStream bao = response.getOutputStream();
             streamingMode = (streamingMode == null) ? "unbounded-buffer" : streamingMode;
+            JSONmode = (JSONmode == null) ? "json" : JSONmode;
 
             if (q instanceof TupleQuery) {
                 TupleQuery selectQuery = (TupleQuery) q;
                 response.setCharacterEncoding("UTF-8");
 
-                if ("*/*".equals(accept) || accept.contains("json")) {
+                if ("*/*".equals(accept) || accept.contains("jsonl") || (accept.contains("json") && JSONmode.toLowerCase().equals("jsonl"))) {
+                    response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+jsonl;charset=UTF-8");
+                    evaluateJSONLSelectQuery(selectQuery, bao, response);
+                } else if (accept.contains("json") || (accept.contains("json") && JSONmode.toLowerCase().equals("json"))) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+json;charset=UTF-8");
-                    evaluateSelectQuery(selectQuery, new SPARQLResultsJSONWriter(bao), response, streamingMode);
+                    evaluateJSONSelectQuery(selectQuery, new SPARQLResultsJSONWriter(bao), bao, response, streamingMode);
                 } else if (accept.contains("xml")) {
                     response.setHeader(HttpHeaders.CONTENT_TYPE, "application/sparql-results+xml;charset=UTF-8");
                     evaluateSelectQuery(selectQuery, new SPARQLResultsXMLWriter(bao), response, streamingMode);
@@ -186,13 +196,9 @@ public class SparqlQueryController {
 
     private void evaluateSelectQuery(TupleQuery selectQuery, TupleQueryResultWriter writer, HttpServletResponse response, String streamingMode) {
         addCacheHeaders(response);
-
         TupleQueryResult result = selectQuery.evaluate();
 
         switch (streamingMode.toLowerCase()) {
-            case "timed-batch":
-                batchResponse(result, writer, response);
-                break;
             case "single-element":
                 individualResponse(result, writer, response);
                 break;
@@ -202,31 +208,17 @@ public class SparqlQueryController {
         }
     }
 
-    private void batchResponse(TupleQueryResult result, TupleQueryResultWriter writer, HttpServletResponse response) throws QueryResultHandlerException{
+    private void evaluateJSONSelectQuery(TupleQuery selectQuery, TupleQueryResultWriter writer, OutputStream bao, HttpServletResponse response, String streamingMode) {
+        addCacheHeaders(response);
+        TupleQueryResult result = selectQuery.evaluate();
 
-        writer.startQueryResult(result.getBindingNames());
-
-        class FlushResponse extends TimerTask {
-            public void run() {
-                try {
-                    System.out.println("FLUSHFLUSH");
-                    synchronized (writer) {
-                        writer.endQueryResult();
-                        response.flushBuffer();
-                        writer.startQueryResult(result.getBindingNames());
-                    }
-                } catch (IOException e) {
-                    throw new QueryResultHandlerException("");
-                }
-            }
-        }
-        Timer timer = new Timer();
-        timer.schedule(new FlushResponse(), 0, 60000);
-
-        while (result.hasNext()) {
-            synchronized (writer){
-                writer.handleSolution(result.next());
-            }
+        switch (streamingMode.toLowerCase()) {
+            case "single-element":
+                individualResponse(result, writer, bao, response);
+                break;
+            case "unbounded-buffer":
+                unboundedBufferResponse(result, writer, response);
+                break;
         }
     }
 
@@ -244,6 +236,103 @@ public class SparqlQueryController {
             }
         }
     }
+
+    /*
+     *  JSON output encoding. Adds an endline at the end of the message.
+     */
+    private void individualResponse(TupleQueryResult result, TupleQueryResultWriter writer, OutputStream bao, HttpServletResponse response) throws QueryResultHandlerException{
+        while (result.hasNext()) {
+            synchronized (response) {
+                writer.startQueryResult(result.getBindingNames());
+                writer.handleSolution(result.next());
+                writer.endQueryResult();
+                try {
+                    response.flushBuffer();
+                    bao.write('\n');
+                } catch (IOException e) {
+                    throw new QueryResultHandlerException("");
+                }
+            }
+        }
+    }
+
+    /*
+     *  JSON Lines output encoding, according to the W3C guidelines (https://www.w3.org/TR/2013/REC-sparql11-results-json-20130321/)
+     */
+    private void evaluateJSONLSelectQuery(TupleQuery selectQuery, OutputStream bao, HttpServletResponse response) throws QueryResultHandlerException{
+        addCacheHeaders(response);
+        TupleQueryResult result = selectQuery.evaluate();
+
+        while (result.hasNext()) {
+            BindingSet binding = result.next();
+
+            String res = "";
+            res = res + "{\"head\" : {\"vars\" : [";
+
+            Iterator<String> it = binding.getBindingNames().iterator();
+            res = res + "\"" + it.next() + "\"";
+            while(it.hasNext()){
+                res = res + ", \"" + it.next() + "\"";
+            }
+
+            res = res + "]}, \"results\" : {\"bindings\" : [{";
+
+            Iterator<Binding> bindingIter = binding.iterator();
+            while (bindingIter.hasNext()) {
+                Binding binding2 = bindingIter.next();
+                res = res + "\"" + binding2.getName() + "\" : ";
+                try {
+                    res = res + writeJSONLValue(binding2.getValue());
+                } catch (IOException e) {
+                    throw new QueryResultHandlerException("");
+                }
+                if (bindingIter.hasNext()){
+                    res = res + ", ";
+                }
+            }
+
+            res = res + "}]}}\n";
+            byte[] byteArrray = res.getBytes(StandardCharsets.UTF_8);
+
+            try {
+                bao.write(byteArrray);
+            } catch (IOException e) {
+                throw new QueryResultHandlerException("");
+            }
+        }
+    }
+
+    private String writeJSONLValue(Value value) throws IOException, QueryResultHandlerException {
+        String result = "{";
+
+        if (value instanceof IRI) {
+            result = result + "\"type\" : \"uri\"";
+            result = result + ", \"value\" : " + "\"" + ((IRI) value).toString() + "\"";
+        } else if (value instanceof BNode) {
+            result = result + "\"type\" : \"bnode\",";
+            result = result + ", \"value\" : " + "\"" + ((BNode) value).getID() + "\"";
+        } else if (value instanceof Literal) {
+            Literal lit = (Literal) value;
+            result = result + "\"type\" : \"literal\"";
+            result = result + ", \"value\" : " + "\"" + lit.getLabel() + "\"";
+
+            if (Literals.isLanguageLiteral(lit)) {
+                result = result + ", \"xml:lang\" : " + "\"" + lit.getLanguage().orElse(null) + "\"";
+            } else {
+                IRI datatype = lit.getDatatype();
+                boolean ignoreDatatype = datatype.equals(XSD.STRING);
+                if (!ignoreDatatype) {
+                    result = result + ", \"datatype\" : " + "\"" + lit.getDatatype().stringValue() + "\"";
+                }
+            }
+        } else {
+            throw new TupleQueryResultHandlerException("Unknown Value object type: " + value.getClass());
+        }
+
+        result = result + "}";
+        return result;
+    }
+
 
     private void unboundedBufferResponse(TupleQueryResult result, TupleQueryResultWriter writer, HttpServletResponse response) throws QueryResultHandlerException{
         writer.startQueryResult(result.getBindingNames());
