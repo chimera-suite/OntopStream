@@ -220,7 +220,7 @@ public class FlinkSelectFromWhereSerializer implements RSPSelectFromWhereSeriali
             try {
                 String name = ((DatabaseRelationDefinition) ((SQLTable) expression).getRelationDefinition()).getRowtime().get().getName();
                 return idFactory.createAttributeID(name);
-            } catch (NoSuchElementException e){
+            } catch (NoSuchElementException | ClassCastException e){
                 return null;
             }
         }

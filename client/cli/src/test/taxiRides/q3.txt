@@ -1,0 +1,11 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX : <http://www.semanticweb.org/TaxiRides#>
+
+SELECT *
+FROM NAMED WINDOW :wind2 ON :trips [RANGE PT5M STEP PT2M]
+WHERE {
+      ?x a ?z.
+      ?x :hasTaxi ?y.
+}
+

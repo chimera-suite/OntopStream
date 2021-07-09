@@ -1,5 +1,6 @@
 [PrefixDeclaration]
 :		http://www.semanticweb.org/TaxiRides#
+taxiRides:	http://www.semanticweb.org/TaxiRides/
 dc:		http://purl.org/dc/elements/1.1/
 owl:		http://www.w3.org/2002/07/owl#
 rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
@@ -13,15 +14,15 @@ terms:		http://purl.org/dc/terms/
 
 [MappingDeclaration] @collection [[
 mappingId	Rides
-target		:{rideId} a :Ride ; :isStart {isStart} ; :lon {lon} ; :lat {lat} ; :rideTime {rideTime} ; :psgCnt {psgCnt} ; :hasTaxi :{taxiId} . :{taxiId} a :Taxi . 
+target		taxiRides:Ride#{rideId} a :Ride ; :isStart {isStart} ; :lon {lon} ; :lat {lat} ; :rideTime {rideTime} ; :psgCnt {psgCnt} ; :hasTaxi taxiRides:Taxi#{taxiId} . taxiRides:Taxi#{taxiId} a :Taxi . 
 source		SELECT `rideId`,`taxiId`,`isStart`,`lon`,`lat`,`rideTime`,`psgCnt` FROM `Rides`;
 
 mappingId	Fares
-target		:Fare :isReferredTo :{rideId} ; :payTime {payTime} ; :payMethod {payMethod} ; :tip {tip} ; :toll {toll} ; :fare {fare} . 
+target		taxiRides:Fare#{rideId} a :Fare ; :isReferredTo taxiRides:Ride#{rideId} ; :payTime {payTime} ; :payMethod {payMethod} ; :tip {tip} ; :toll {toll} ; :fare {fare} . 
 source		SELECT `rideId`,`payTime`,`payMethod`,`tip`,`toll`,`fare` FROM `Fares`;
 
 mappingId	DriverChanges
-target		:DrivingShift :uses :{taxiId} ; :startTime {usageStartTime} . :{driverId} a :Driver ; :startsA :DrivingShift . 
+target		taxiRides:Shift#{driverId}_{taxiId} a :DrivingShift ; :uses taxiRides:Taxi#{taxiId} ; :startTime {usageStartTime} . taxiRides:Driver#{driverId} a :Driver ; :hasShift taxiRides:Shift#{driverId}_{taxiId} . 
 source		SELECT `taxiId`,`driverId`,`usageStartTime` FROM `DriverChanges`;
 ]]
 

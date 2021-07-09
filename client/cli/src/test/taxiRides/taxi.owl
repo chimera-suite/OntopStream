@@ -36,6 +36,15 @@
     
 
 
+    <!-- http://www.semanticweb.org/TaxiRides#hasShift -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#hasShift">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Driver"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/TaxiRides#DrivingShift"/>
+    </owl:ObjectProperty>
+    
+
+
     <!-- http://www.semanticweb.org/TaxiRides#hasTaxi -->
 
     <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#hasTaxi">
@@ -55,25 +64,15 @@
 
     <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#isReferredTo">
         <owl:inverseOf rdf:resource="http://www.semanticweb.org/TaxiRides#refersTo"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://www.semanticweb.org/TaxiRides#refersTo -->
-
-    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#refersTo">
         <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
         <rdfs:range rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
     </owl:ObjectProperty>
     
 
 
-    <!-- http://www.semanticweb.org/TaxiRides#startsA -->
+    <!-- http://www.semanticweb.org/TaxiRides#refersTo -->
 
-    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#startsA">
-        <rdfs:domain rdf:resource="http://www.semanticweb.org/TaxiRides#Driver"/>
-        <rdfs:range rdf:resource="http://www.semanticweb.org/TaxiRides#DrivingShift"/>
-    </owl:ObjectProperty>
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/TaxiRides#refersTo"/>
     
 
 
@@ -268,7 +267,12 @@
 
     <!-- http://www.semanticweb.org/TaxiRides#Car -->
 
-    <owl:Class rdf:about="http://www.semanticweb.org/TaxiRides#Car"/>
+    <owl:Class rdf:about="http://www.semanticweb.org/TaxiRides#Car">
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Driver"/>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#DrivingShift"/>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Fare"/>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/TaxiRides#Ride"/>
+    </owl:Class>
     
 
 
