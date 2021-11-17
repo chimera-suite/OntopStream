@@ -26,6 +26,45 @@ Ontop translates [SPARQL queries](https://www.w3.org/TR/sparql11-query/) expres
 - [Official Website and Documentation](https://ontop-vkg.org)
 - [GitHub](https://github.com/ontop/ontop/)
 
+Usage & Troubleshooting
+--------------------
+### CLI
+To run OntopStream-CLI, you need to execute the `ontop.sh` script and use the following syntax:
+
+```
+./ontop query                               \
+      --ontology=<path-owl>                 \
+      --mapping=<path-obda-mappings>        \
+      --properties=<path-properties-file>   \
+      --query=<path-query-file>             \
+      --output=<optional-results-file>
+```
+Where the the OntopStream’s arguments are respectively:
+
+1. `ontology`: the path to the file containing the ontological concepts needed by the Ontop reasoner for describing the semantic of the relational data stored in the data lake.
+2. `mapping`: the path to the mapping file for the RSP-QL to FlinkSQL translations performed by the Streaming Virtual Knowledge Graph mechanism of OntopStream.
+3. `properties`: the path to the configuration file for correctly instantiating the JDBC connection to the Apache Spark query engine. In particular, the file must contain the address of the Flink JDBC endpoint.
+4. `query`: the path to the file containing the RSP-QL query to be submitted. (Note: if are not needed windows conditions, you can just write a SPARQL query).
+5. `output`[OPTIONAL]: The path to a file, created by OntopStream during its execution, where the results are stored in CSV format. If not specified, the results are printed on the terminal.
+
+To terminate the query execution, you can use `CTRL+C`. The query de-registration in Flink is automated.
+
+#### Troubleshooting
+
+If during the CLI execution you get a message similar to this one
+
+```
+Exception in thread "main" java.lang.UnsupportedClassVersionError: it/unibz/inf/ontop/injection/OntopReformulationConfiguration has been compiled by
+a more recent version of the Java Runtime (class file version 55.0), this version of the Java Runtime only recognizes class file versions up to 52.0
+	at java.lang.ClassLoader.defineClass1(Native Method)
+	at java.lang.ClassLoader.defineClass(ClassLoader.java:756)
+    ...
+```
+There is a problem with the default Java version used in your machine. Please make sure to have installed [JDK-11](http://jdk.java.net/java-se-ri/11) or [OpenJDK-11](https://jdk.java.net/archive/).
+
+If not, you can download Java 11 and set the right version with `export JAVA_HOME='<PATH-TO-JDK-INSTALLATION-FOLDER>'` (Linux machines)
+
+
 Compiling, packing, etc.
 --------------------
 
