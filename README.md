@@ -11,7 +11,7 @@ Users can perform queries on their local machine using the ___OntopStream-CLI___
 - [Releases](https://github.com/chimera-suite/OntopStream/releases)
 - [DockerHub](https://hub.docker.com/r/chimerasuite/ontop-stream)
 - [Tutorial (docker)](https://github.com/chimera-suite/OntopStream-running-example)
-- [__NEW__][WWW Conference Tutorial](https://github.com/chimera-suite/OntopStream-tutorial) - [event](https://streamreasoning.org/events/web-stream-processing-tutorial-thewebconf/)
+- [__NEW__] [WWW Conference Tutorial](https://github.com/chimera-suite/OntopStream-tutorial) - [event](https://streamreasoning.org/events/web-stream-processing-tutorial-thewebconf/)
 - Tutorial (cli): coming soon
 - [Performance evaluation](https://github.com/chimera-suite/OntopStream-evaluation)
 
